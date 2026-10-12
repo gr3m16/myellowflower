@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #FFD700;
+  --color-dark-purple: #1a0a2e;
+  --color-violet: #4a0e6e;
+  --color-deep-purple: #2d0a4a;
+  --color-warm-brown: #8b4513;
+  --color-wood: #5d3a1a;
+  --color-crimson: #8b0000;
+  --color-plaid-red: #a52a2a;
+  --color-plaid-black: #1a1a1a;
+  --color-rose: #c73e5c;
+  --color-sage: #6b8e5c;
+  --color-cream: #f5f0e1;
+  --color-gold-glow: #ffeb3b;
+  --color-evil-purple: #3d0c5e;
+  --color-evil-black: #0d0514;
+  --color-divine-light: #fffde7;
+  --color-divine-gold: #ffd600;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body, #app {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--color-dark-purple);
+  }
+  
+  body {
+    font-family: 'Press Start 2P', 'VT323', monospace;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  canvas {
+    display: block;
+  }
+}
+
+@layer utilities {
+  .pixel-font {
+    font-family: 'Press Start 2P', 'VT323', monospace;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  
+  .gold-border {
+    border: 4px solid var(--color-gold);
+    box-shadow: 
+      0 0 10px var(--color-gold),
+      0 0 20px var(--color-gold),
+      inset 0 0 10px rgba(255, 215, 0, 0.3);
+    animation: goldPulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes goldPulse {
+    0%, 100% { box-shadow: 0 0 10px var(--color-gold), 0 0 20px var(--color-gold), inset 0 0 10px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: 0 0 20px var(--color-gold), 0 0 40px var(--color-gold), inset 0 0 20px rgba(255, 215, 0, 0.5); }
+  }
+  
+  .sunflower-border {
+    position: relative;
+    border: 4px solid var(--color-gold);
+  }
+  
+  .sunflower-border::before,
+  .sunflower-border::after {
+    content: '🌻';
+    position: absolute;
+    font-size: 24px;
+    animation: sunflowerSpin 4s linear infinite;
+  }
+  
+  .sunflower-border::before {
+    top: -16px;
+    left: -16px;
+  }
+  
+  .sunflower-border::after {
+    bottom: -16px;
+    right: -16px;
+    animation-direction: reverse;
+  }
+  
+  @keyframes sunflowerSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  
+  .retro-text-shadow {
+    text-shadow: 
+      2px 2px 0 var(--color-evil-black),
+      4px 4px 0 rgba(61, 12, 94, 0.5);
+  }
+  
+  .divine-glow {
+    text-shadow: 
+      0 0 5px var(--color-divine-gold),
+      0 0 10px var(--color-divine-gold),
+      0 0 20px var(--color-divine-light);
+    animation: divinePulse 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes divinePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  .negative-word {
+    animation: floatChaos 3s ease-in-out infinite;
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+  }
+  
+  @keyframes floatChaos {
+    0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+    25% { transform: translate(10px, -15px) rotate(3deg); }
+    50% { transform: translate(-5px, -25px) rotate(-1deg); }
+    75% { transform: translate(-10px, -10px) rotate(2deg); }
+  }
+  
+  .screen-shake {
+    animation: screenShake 0.5s ease-in-out;
+  }
+  
+  @keyframes screenShake {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-5px, -3px); }
+    20% { transform: translate(5px, 3px); }
+    30% { transform: translate(-3px, 5px); }
+    40% { transform: translate(3px, -5px); }
+    50% { transform: translate(-5px, 3px); }
+    60% { transform: translate(5px, -3px); }
+    70% { transform: translate(-3px, -5px); }
+    80% { transform: translate(3px, 5px); }
+    90% { transform: translate(-2px, 2px); }
+  }
+  
+  .fade-in {
+    animation: fadeIn 1s ease-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .fade-out {
+    animation: fadeOut 1s ease-in forwards;
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  
+  .slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+  
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
