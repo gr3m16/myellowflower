@@ -36,7 +36,11 @@ function generateMaze(C, R, rng, extraOpenings) {
     grid[2 * ny + 1][2 * nx + 1] = 0
     stack.push([nx, ny])
   }
-  for (let i = 0; i < extraOpenings; i++) openWall(grid, C, R, rng)
+  let braided = 0
+  let guard = 6000
+  while (braided < extraOpenings && guard--) {
+    if (openWall(grid, C, R, rng)) braided++
+  }
   return grid
 }
 
@@ -56,9 +60,10 @@ function openWall(grid, C, R, rng) {
       : [grid[my - 1][mx], grid[my + 1][mx]]
     if (across[0] === 0 && across[1] === 0) {
       grid[my][mx] = 0
-      return
+      return true
     }
   }
+  return false
 }
 
 function bfsDist(grid, sx, sy) {
@@ -157,9 +162,9 @@ function ensureReachable(map) {
 
 export function generateLevel(num) {
   const params = [
-    { seed: 21, extraOpenings: 1, traps: 2 },
-    { seed: 51, extraOpenings: 3, traps: 5 },
-    { seed: 87, extraOpenings: 5, traps: 8 },
+    { seed: 21, extraOpenings: 6, traps: 2 },
+    { seed: 51, extraOpenings: 10, traps: 5 },
+    { seed: 87, extraOpenings: 14, traps: 8 },
   ][num - 1]
   const C = 12
   const R = 6

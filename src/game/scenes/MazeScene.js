@@ -14,7 +14,10 @@ const SPEED = 320
 const SNAP_EPS = 10
 const GRACE_MS = 2500
 const SAFE_ZONE = 6
-const ENEMY_HITBOX = 0.8
+const ENEMY_ACTIVE_MS = 4000
+const ENEMY_FADED_MS = 2500
+const ENEMY_SCALE = 0.6
+const ENEMY_BODY = 10
 
 const DIRS = [
   [0, -1],
@@ -600,9 +603,9 @@ export default class MazeScene extends Phaser.Scene {
         const tile = spawns[k++] || this.safeFallbackSpawn()
         const c = centerOf(tile)
         const spr = this.physics.add.sprite(c.x, c.y, 'cizana_mini').setDepth(9.5)
-        spr.setScale(1.1)
+        spr.setScale(ENEMY_SCALE)
         spr.body.moves = false
-        spr.body.setSize(12.8, 12.8, true)
+        spr.body.setSize(ENEMY_BODY, ENEMY_BODY, true)
         spr.setAlpha(0.5)
         const e = {
           spr,
@@ -616,6 +619,10 @@ export default class MazeScene extends Phaser.Scene {
           next: this.time.now,
           tween: null,
           blinkTween: this.tweens.add({ targets: spr, alpha: { from: 0.55, to: 0.2 }, duration: 380, yoyo: true, repeat: -1 }),
+          faded: false,
+          dead: false,
+          fadeEvent: null,
+          fadeRestore: null,
         }
         this.enemies.push(e)
       }
@@ -668,6 +675,32 @@ export default class MazeScene extends Phaser.Scene {
         e.blinkTween = null
       }
       this.tweens.add({ targets: e.spr, alpha: 1, duration: 300 })
+      this.scheduleFade(e)
+    }
+  }
+
+  scheduleFade(e) {
+    if (e.dead || !this.playing) return
+    e.fadeEvent = this.time.addEvent({
+      delay: ENEMY_ACTIVE_MS,
+      callback: () => {
+        if (e.dead || !this.playing) return
+        this.setEnemyFaded(e, true)
+        e.fadeRestore = this.time.delayedCall(ENEMY_FADED_MS, () => {
+          if (e.dead) return
+          this.setEnemyFaded(e, false)
+          this.scheduleFade(e)
+        })
+      },
+    })
+  }
+
+  setEnemyFaded(e, faded) {
+    if (e.dead) return
+    e.faded = faded
+    if (e.spr && e.spr.body) e.spr.body.enable = !faded
+    if (e.spr && e.spr.active) {
+      this.tweens.add({ targets: e.spr, alpha: faded ? 0.3 : 1, duration: 220 })
     }
   }
 
@@ -709,7 +742,11 @@ export default class MazeScene extends Phaser.Scene {
     }
     if (this.enemies) {
       for (const e of this.enemies) {
+        e.dead = true
+        if (e.fadeEvent) e.fadeEvent.remove()
+        if (e.fadeRestore) e.fadeRestore.remove()
         if (e.tween) this.tweens.killTweensOf(e.spr)
+        if (e.blinkTween) this.tweens.remove(e.blinkTween)
         if (e.spr && e.spr.active) e.spr.destroy()
       }
       this.enemies = []
@@ -868,6 +905,8 @@ export default class MazeScene extends Phaser.Scene {
       e.next = now + interval
       const from = { x: e.cell.x, y: e.cell.y }
       if (to) {
+        const fc = centerOf(from)
+        e.spr.setPosition(fc.x, fc.y)
         e.cell = to
         const c = centerOf(to)
         if (to.x !== from.x) e.spr.setFlipX(to.x < from.x)
@@ -952,6 +991,7 @@ export default class MazeScene extends Phaser.Scene {
     if (now < this.enemyGraceUntil) return false
     const pb = this.player.body
     for (const e of this.enemies) {
+      if (e.faded || !e.spr.body || !e.spr.body.enable) continue
       const eb = e.spr.body
       if (eb.right > pb.left && eb.left < pb.right && eb.bottom > pb.top && eb.top < pb.bottom) {
         this.failLevel('¡LA CIZAÑA TE ATRAPÓ!', 0xff4bd6)
